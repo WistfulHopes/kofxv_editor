@@ -1,21 +1,33 @@
 use binrw::{BinRead};
+use byteorder::{LE, WriteBytesExt};
 use serde::{Serialize, Deserialize};
 use crate::cfile::FileHeader;
-use std::{str, mem};
+use std::{str, mem, io::Write};
 
 #[derive(BinRead, Serialize, Deserialize)]
 struct CharaActionDataActionHeader {
     data_version: u32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     action_count: i32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     anim_offset: u32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     anim_offset_2: u32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     camera_offset: u32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     bone_offset: u32,
+}
+
+impl CharaActionDataActionHeader {
+    fn write(&self, buf: &mut Vec<u8>) {
+        buf.write_u32::<LE>(self.data_version).unwrap();
+        buf.write_i32::<LE>(self.action_count).unwrap();
+        buf.write_u32::<LE>(self.anim_offset).unwrap();
+        buf.write_u32::<LE>(self.anim_offset_2).unwrap();
+        buf.write_u32::<LE>(self.camera_offset).unwrap();
+        buf.write_u32::<LE>(self.bone_offset).unwrap();
+    }
 }
 
 #[derive(BinRead, Serialize, Deserialize)]
@@ -29,12 +41,27 @@ struct CharaActionDataActionDataInfo {
     reserve2: i32,
     reserve3: i32,
     reserve4: i32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     line_count: i32,
 }
 
+impl CharaActionDataActionDataInfo {
+    fn write(&self, buf: &mut Vec<u8>) {
+        buf.write_i32::<LE>(self.category_id).unwrap();
+        buf.write_i32::<LE>(self.sub_category_id).unwrap();
+        buf.write_i32::<LE>(self.end_frame).unwrap();
+        buf.write_i32::<LE>(self.loop_back_frame).unwrap();
+        buf.write_i32::<LE>(self.option_flag).unwrap();
+        buf.write_i32::<LE>(self.reserve1).unwrap();
+        buf.write_i32::<LE>(self.reserve2).unwrap();
+        buf.write_i32::<LE>(self.reserve3).unwrap();
+        buf.write_i32::<LE>(self.reserve4).unwrap();
+        buf.write_i32::<LE>(self.line_count).unwrap();
+    }
+}
+
 #[repr(C, packed)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct CharaActionDataBaseAnime
 {
     motion_file_id: i32,
@@ -42,36 +69,40 @@ struct CharaActionDataBaseAnime
     motion_frame: f32,
     blend: f32,
     transparent: f32, 
-    #[serde(skip_serializing)]
-    padding: [u32; 5],
+    unk1: f32, 
+    unk2: u32, 
+    unk3: u32, 
+    unk4: f32, 
+    #[serde(skip_serializing, default)]
+    padding: u32,
 }
 
 #[repr(C, packed)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct CharaActionDataFaceAnime
 {
     motion_file_id: i32,
     motion_id: i32,
     motion_frame: f32,
     blend: f32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     padding: [u32; 6],
 }
 
 #[repr(C, packed)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct CharaActionDataUnkAnime
 {
     motion_file_id: i32,
     motion_id: i32,
     motion_frame: f32,
     blend: f32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     padding: [u32; 6],
 }
 
 #[repr(C, packed)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct CharaActionDataCollision
 {
     rect_id: i32,
@@ -84,7 +115,7 @@ struct CharaActionDataCollision
 }
 
 #[repr(C, packed)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct CharaActionDataUnkCollision
 {
     rect_id: i32,
@@ -107,20 +138,19 @@ struct CollisionHitRect
 }
 
 #[repr(C, packed)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct CharaActionDataAttack
 {
     dataid: i32,
     group_id: i32,
-    #[serde(flatten)]
     rect: CollisionHitRect,
     flag: i32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     padding: [u32; 3],
 }
 
 #[repr(C, packed)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct CharaActionDataCancel
 {
     flg1: i32,
@@ -129,12 +159,12 @@ struct CharaActionDataCancel
     terms: i32,
     flg4: i32,
     precede_frame: i32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     padding: [u32; 4],
 }
 
 #[repr(C, packed)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct CharaActionDataBranch
 {
     type_1: i32,
@@ -143,12 +173,12 @@ struct CharaActionDataBranch
     action_frame: i32,
     type_2: i32,
     param_2: f32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     padding: [u32; 4],
 }
 
 #[repr(C, packed)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct CharaActionDataMove
 {
     x: f32,
@@ -156,23 +186,23 @@ struct CharaActionDataMove
     col_x: f32,
     col_y: f32,
     option_flag: i32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     padding: [u32; 5],
 }
 
 #[repr(C, packed)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct CharaActionDataOffset
 {
     x: f32,
     y: f32,
     z: f32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     padding: [u32; 7],
 }
 
 #[repr(C, packed)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct CharaActionDataSpeed
 {
     set_flag: i32,
@@ -181,17 +211,17 @@ struct CharaActionDataSpeed
     add_x: f32,
     add_y: f32,
     option_flag: i32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     padding: [u32; 4],
 }
 
 #[repr(C, packed)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct CharaActionDataActionFlag
 {
     flag: i32,
     param1: i32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     padding: [u32; 8],
 }
 
@@ -267,10 +297,23 @@ struct SoundStop
     reserve5: i32,
 }
 
+#[repr(C, packed)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
+struct SoundUnk
+{
+    float: f32,
+    reserve1: i32,
+    reserve2: i32,
+    reserve3: i32,
+    reserve4: i32,
+    reserve5: i32,
+}
+
 #[derive(Serialize, Deserialize, Clone, Copy)]
 enum SoundType {
     Play(SoundPlay),
     Stop(SoundStop),
+    Unk(SoundUnk),
     DefaultSound([u32; 6]),
 }
 
@@ -280,15 +323,16 @@ impl Default for SoundType {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[repr(C, packed)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 struct CharaActionDataSound
 {
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     data: [u32; 6],
-    #[serde(skip_serializing)]
-    padding: [u32; 3],
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     sound_type: u32,
+    #[serde(skip_serializing, default)]
+    padding: [u32; 3],
     sound: SoundType,
 }
 
@@ -300,91 +344,91 @@ fn line_parser(count: usize, _: u8) -> binrw::BinResult<Vec<CharaActionDataActio
         for mut frame in &mut line.frame {
             match line.action_line_id {
                 0 => {
-                    let mut base_anime: CharaActionDataBaseAnime = unsafe { mem::zeroed() };
+                    let base_anime: CharaActionDataBaseAnime;
                     unsafe {
                         base_anime = mem::transmute::<[u32; 10], CharaActionDataBaseAnime>(frame.data);
                     }                
                     frame.line = Line::BaseAnime(base_anime)
                 },
                 1 => {
-                    let mut face_anime: CharaActionDataFaceAnime = unsafe { mem::zeroed() };
+                    let face_anime: CharaActionDataFaceAnime;
                     unsafe {
                         face_anime = mem::transmute::<[u32; 10], CharaActionDataFaceAnime>(frame.data);
                     }                
                     frame.line = Line::FaceAnime(face_anime)
                 },
                 2 => {
-                    let mut unk_anime: CharaActionDataUnkAnime = unsafe { mem::zeroed() };
+                    let unk_anime: CharaActionDataUnkAnime;
                     unsafe {
                         unk_anime = mem::transmute::<[u32; 10], CharaActionDataUnkAnime>(frame.data);
                     }                
                     frame.line = Line::UnkAnime(unk_anime)
                 },
                 3 => {
-                    let mut collision: CharaActionDataCollision = unsafe { mem::zeroed() };
+                    let collision: CharaActionDataCollision;
                     unsafe {
                         collision = mem::transmute::<[u32; 10], CharaActionDataCollision>(frame.data);
                     }                
                     frame.line = Line::Collision(collision)
                 },
                 4 => {
-                    let mut unk_collision: CharaActionDataUnkCollision = unsafe { mem::zeroed() };
+                    let unk_collision: CharaActionDataUnkCollision;
                     unsafe {
                         unk_collision = mem::transmute::<[u32; 10], CharaActionDataUnkCollision>(frame.data);
                     }                
                     frame.line = Line::UnkCollision(unk_collision)
                 },
                 5 => {
-                    let mut attack: CharaActionDataAttack = unsafe { mem::zeroed() };
+                    let attack: CharaActionDataAttack;
                     unsafe {
                         attack = mem::transmute::<[u32; 10], CharaActionDataAttack>(frame.data);
                     }                
                     frame.line = Line::Attack(attack)
                 },
                 6 => {
-                    let mut cancel: CharaActionDataCancel = unsafe { mem::zeroed() };
+                    let cancel: CharaActionDataCancel;
                     unsafe {
                         cancel = mem::transmute::<[u32; 10], CharaActionDataCancel>(frame.data);
                     }                
                     frame.line = Line::Cancel(cancel)
                 },
                 7 => {
-                    let mut branch: CharaActionDataBranch = unsafe { mem::zeroed() };
+                    let branch: CharaActionDataBranch;
                     unsafe {
                         branch = mem::transmute::<[u32; 10], CharaActionDataBranch>(frame.data);
                     }                
                     frame.line = Line::Branch(branch)
                 },
                 8 => {
-                    let mut line_move: CharaActionDataMove = unsafe { mem::zeroed() };
+                    let line_move: CharaActionDataMove;
                     unsafe {
                         line_move = mem::transmute::<[u32; 10], CharaActionDataMove>(frame.data);
                     }                
                     frame.line = Line::Move(line_move)
                 },
                 9 => {
-                    let mut offset: CharaActionDataOffset = unsafe { mem::zeroed() };
+                    let offset: CharaActionDataOffset;
                     unsafe {
                         offset = mem::transmute::<[u32; 10], CharaActionDataOffset>(frame.data);
                     }                
                     frame.line = Line::Offset(offset)
                 },
                 10 => {
-                    let mut speed: CharaActionDataSpeed = unsafe { mem::zeroed() };
+                    let speed: CharaActionDataSpeed;
                     unsafe {
                         speed = mem::transmute::<[u32; 10], CharaActionDataSpeed>(frame.data);
                     }                
                     frame.line = Line::Speed(speed)
                 },
                 11 => {
-                    let mut action_flag: CharaActionDataActionFlag = unsafe { mem::zeroed() };
+                    let action_flag: CharaActionDataActionFlag;
                     unsafe {
                         action_flag = mem::transmute::<[u32; 10], CharaActionDataActionFlag>(frame.data);
                     }                
                     frame.line = Line::ActionFlag(action_flag)
                 },
                 14 => {
-                    let mut effect: CharaActionDataEffect = unsafe { mem::zeroed() };
+                    let effect: CharaActionDataEffect;
                     unsafe {
                         effect = mem::transmute::<[u32; 10], CharaActionDataEffect>(frame.data);
                     }
@@ -392,23 +436,32 @@ fn line_parser(count: usize, _: u8) -> binrw::BinResult<Vec<CharaActionDataActio
                 },
                 15 => {
                     let mut sound: CharaActionDataSound = unsafe { mem::zeroed() };
-                    sound.data.clone_from_slice(&frame.data[..6]);
+                    let mut buf: [u32; 6] = [0; 6];
+                    buf.clone_from_slice(&frame.data[..6]);
+                    sound.data = buf;
                     sound.sound_type = frame.data[6];
                     match sound.sound_type
                     {
                         0 => {
-                            let mut play: SoundPlay = unsafe { mem::zeroed() };
+                            let play: SoundPlay;
                             unsafe {
                                 play = mem::transmute::<[u32; 6], SoundPlay>(sound.data);
-                            }                
+                            }
                             sound.sound = SoundType::Play(play)
                         },
                         1 => {
-                            let mut stop: SoundStop = unsafe { mem::zeroed() };
+                            let stop: SoundStop;
                             unsafe {
                                 stop = mem::transmute::<[u32; 6], SoundStop>(sound.data);
-                            }                
+                            }
                             sound.sound = SoundType::Stop(stop)
+                        },
+                        2 => {
+                            let unk: SoundUnk;
+                            unsafe {
+                                unk = mem::transmute::<[u32; 6], SoundUnk>(sound.data);
+                            }
+                            sound.sound = SoundType::Unk(unk)
                         },
                         _ => sound.sound = SoundType::DefaultSound(sound.data),
                     }
@@ -450,19 +503,46 @@ impl Default for Line {
 #[derive(BinRead, Serialize, Deserialize)]
 struct CharaActionDataActionLineFrame {
     frame: i32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     data: [u32; 10],
     #[br(ignore)]
     line: Line,
 }
 
+fn vec_u32_to_u8(vec32: Vec<u32>) -> Vec<u8> {
+    let mut vec8: Vec<u8> = vec![];
+    for elem in vec32 {
+        vec8.write_u32::<LE>(elem).unwrap();
+    }
+    vec8
+}
+
+impl CharaActionDataActionLineFrame {
+    fn write(&self, buf: &mut Vec<u8>) {
+        buf.write_i32::<LE>(self.frame).unwrap();
+        let vec32 = self.data.to_vec();
+        let vec8 = vec_u32_to_u8(vec32);
+        buf.write_all(&vec8).unwrap();
+    }
+}
+
 #[derive(BinRead, Serialize, Deserialize)]
 struct CharaActionDataActionLine {
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     key_frame_count: i32,
     action_line_id: i32,
     #[br(count = key_frame_count)]
     frame: Vec<CharaActionDataActionLineFrame>,
+}
+
+impl CharaActionDataActionLine {
+    fn write(&self, buf: &mut Vec<u8>) {
+        buf.write_i32::<LE>(self.key_frame_count).unwrap();
+        buf.write_i32::<LE>(self.action_line_id).unwrap();
+        for frame in &self.frame {
+            frame.write(buf);
+        }
+    }
 }
 
 #[derive(BinRead, Serialize, Deserialize)]
@@ -471,6 +551,15 @@ struct CharaActionDataActionData {
     #[br(args(info.line_count as usize, 0))]
     #[br(parse_with = line_parser)]
     frame: Vec<CharaActionDataActionLine>,
+}
+
+impl CharaActionDataActionData {
+    fn write(&self, buf: &mut Vec<u8>) {
+        self.info.write(buf);
+        for frame in &self.frame {
+            frame.write(buf);
+        }
+    }
 }
 
 #[binrw::parser(reader, endian)]
@@ -489,75 +578,182 @@ fn name_parser(count: usize, _: u8) -> binrw::BinResult<Vec<Name>> {
 
 #[derive(BinRead, Serialize, Deserialize)]
 struct Name {
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     name_size: u32,
     #[br(count = name_size)]
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     name: Vec<u8>,
     #[br(ignore)]
     pretty_name: String,
 }
 
+impl Name {
+    fn prepare_write(&mut self) {
+        self.name = self.pretty_name.as_bytes().to_vec();
+        self.name_size = self.name.len() as u32;
+    }
+    fn write(&self, buf: &mut Vec<u8>) {
+        buf.write_u32::<LE>(self.name_size).unwrap();
+        buf.write_all(&self.name).unwrap();
+    }
+}
+
 #[derive(BinRead, Serialize, Deserialize)]
 struct NameList {
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     demo_count: u32,
     unk1: [u32; 9],
     #[br(args(demo_count as usize, 0))]
     #[br(parse_with = name_parser)]
     demo_names: Vec<Name>,
     unk2: u32,
-    #[serde(skip_serializing)]
+    #[br(ignore)]
+    #[serde(skip_serializing, default)]
+    anim_offset: u32,
+    #[serde(skip_serializing, default)]
     chara_anim_count: u32,
     #[br(args(chara_anim_count as usize, 0))]
     #[br(parse_with = name_parser)]
     chara_anim_names: Vec<Name>,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     cmn_anim_count: u32,
     #[br(args(cmn_anim_count as usize, 0))]
     #[br(parse_with = name_parser)]
     cmn_anim_names: Vec<Name>,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     face_count: u32,
     #[br(args(face_count as usize, 0))]
     #[br(parse_with = name_parser)]
     face_names: Vec<Name>, 
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     face_count_2: u32,
     #[br(args(face_count_2 as usize, 0))]
     #[br(parse_with = name_parser)]
+    #[serde(skip_serializing, default)]
     face_names_2: Vec<Name>,
     unk3: u64,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     chara_anim_count_2: u32,
     #[br(args(chara_anim_count_2 as usize, 0))]
     #[br(parse_with = name_parser)]
+    #[serde(skip_serializing, default)]
     chara_anim_names_2: Vec<Name>,
     unk4: u32,
-    #[serde(skip_serializing)]
+    #[serde(skip_serializing, default)]
     mat_count: u32,
     #[br(args(mat_count as usize, 0))]
     #[br(parse_with = name_parser)]
     mat_names: Vec<Name>,
     unk5: u32,
-    #[serde(skip_serializing)]
+    #[br(ignore)]
+    #[serde(skip_serializing, default)]
+    camera_offset: u32,
+    #[serde(skip_serializing, default)]
     camera_count: u32,
     #[br(args(camera_count as usize, 0))]
     #[br(parse_with = name_parser)]
     camera_names: Vec<Name>,
-    #[serde(skip_serializing)]
+    #[br(ignore)]
+    #[serde(skip_serializing, default)]
+    bone_offset: u32,
+    #[serde(skip_serializing, default)]
     bone_count: u32,
     #[br(args(bone_count as usize, 0))]
     #[br(parse_with = name_parser)]
     bone_names: Vec<Name>,
 }
 
+impl NameList {
+    fn prepare_write(&mut self) {
+        self.demo_count = self.demo_names.len() as u32;
+        for name in &mut self.demo_names {
+            name.prepare_write();
+        }
+        self.chara_anim_count = self.chara_anim_names.len() as u32;
+        for name in &mut self.chara_anim_names {
+            name.prepare_write();
+        }
+        self.chara_anim_count_2 = self.chara_anim_names_2.len() as u32;
+        for name in &mut self.chara_anim_names_2 {
+            name.prepare_write();
+        }
+        self.cmn_anim_count = self.cmn_anim_names.len() as u32;
+        for name in &mut self.cmn_anim_names {
+            name.prepare_write();
+        }
+        self.face_count = self.face_names.len() as u32;
+        for name in &mut self.face_names {
+            name.prepare_write();
+        }
+        self.face_count_2 = self.face_names_2.len() as u32;
+        for name in &mut self.face_names_2 {
+            name.prepare_write();
+        }
+        self.mat_count = self.mat_names.len() as u32;
+        for name in &mut self.mat_names {
+            name.prepare_write();
+        }
+        self.camera_count = self.camera_names.len() as u32;
+        for name in &mut self.camera_names {
+            name.prepare_write();
+        }
+        self.bone_count = self.bone_names.len() as u32;
+        for name in &mut self.bone_names {
+            name.prepare_write();
+        }
+    }
+    fn write(&mut self, buf: &mut Vec<u8>) {
+        buf.write_u32::<LE>(self.demo_count).unwrap();
+        let unk1 = vec_u32_to_u8(self.unk1.to_vec());
+        buf.write_all(&unk1).unwrap();
+        for name in &self.demo_names {
+            name.write(buf);
+        }
+        buf.write_u32::<LE>(self.unk2).unwrap();
+        self.anim_offset = buf.len() as u32 - 8;
+        buf.write_u32::<LE>(self.chara_anim_count).unwrap();
+        for name in &self.chara_anim_names {
+            name.write(buf);
+        }
+        buf.write_u32::<LE>(self.cmn_anim_count).unwrap();
+        for name in &self.cmn_anim_names {
+            name.write(buf);
+        }
+        for _ in 0..2
+        {
+            buf.write_u32::<LE>(self.face_count).unwrap();
+            for name in &self.face_names {
+                name.write(buf);
+            }
+        }
+        buf.write_u64::<LE>(self.unk3).unwrap();
+        buf.write_u32::<LE>(self.chara_anim_count).unwrap();
+        for name in &self.chara_anim_names {
+            name.write(buf);
+        }
+        buf.write_u32::<LE>(self.unk4).unwrap();
+        buf.write_u32::<LE>(self.mat_count).unwrap();
+        for name in &self.mat_names {
+            name.write(buf);
+        }
+        buf.write_u32::<LE>(self.unk5).unwrap();
+        self.camera_offset = buf.len() as u32 - 4;
+        buf.write_u32::<LE>(self.camera_count).unwrap();
+        for name in &self.camera_names {
+            name.write(buf);
+        }
+        self.bone_offset = buf.len() as u32 - 4;
+        buf.write_u32::<LE>(self.bone_count).unwrap();
+        for name in &self.bone_names {
+            name.write(buf);
+        }
+    }
+}
+
 #[derive(BinRead, Serialize, Deserialize)]
 #[br(magic = b"\x00\x00\x00\x00")]
 pub(crate) struct CharaActionData {
-    #[serde(flatten)]
     file_header: FileHeader,
-    #[serde(flatten)]
     data_header: CharaActionDataActionHeader,
 
     #[br(count = data_header.action_count)]
@@ -567,6 +763,187 @@ pub(crate) struct CharaActionData {
     #[br(parse_with = name_parser)]
     act_names: Vec<Name>,
 
-    #[serde(flatten)]
     name_list: NameList,
+}
+
+impl CharaActionData {
+    fn write_action_count(&mut self) {
+        self.data_header.action_count = self.frame.len() as i32;
+    }
+    fn write_action_lines(&mut self) {
+        for action_data in &mut self.frame {
+            action_data.info.line_count = action_data.frame.len() as i32;
+            for frame in &mut action_data.frame {
+                frame.key_frame_count = frame.frame.len() as i32;
+                for line in &mut frame.frame {
+                    match &mut line.line {
+                        Line::BaseAnime(base_anime) => {
+                            let v = bincode::serialize(&base_anime).unwrap();
+                            let buf: [u8; 36] = v.try_into().expect("incorrect size!");
+                            let mut new_buf: [u8; 40] = [0; 40];
+                            new_buf[..36].clone_from_slice(&buf);
+                            line.data = unsafe { std::mem::transmute(new_buf) };
+                        }
+                        Line::FaceAnime(face_anime) => {
+                            let v = bincode::serialize(&face_anime).unwrap();
+                            let buf: [u8; 16] = v.try_into().expect("incorrect size!");
+                            let mut new_buf: [u8; 40] = [0; 40];
+                            new_buf[..16].clone_from_slice(&buf);
+                            line.data = unsafe { std::mem::transmute(new_buf) };
+                        }
+                        Line::UnkAnime(unk_anime) => {
+                            let v = bincode::serialize(&unk_anime).unwrap();
+                            let buf: [u8; 16] = v.try_into().expect("incorrect size!");
+                            let mut new_buf: [u8; 40] = [0; 40];
+                            new_buf[..16].clone_from_slice(&buf);
+                            line.data = unsafe { std::mem::transmute(new_buf) };
+                        }
+                        Line::Collision(collision) => {
+                            let v = bincode::serialize(&collision).unwrap();
+                            let buf: [u8; 40] = v.try_into().expect("incorrect size!");
+                            line.data = unsafe { std::mem::transmute(buf) };
+                        }
+                        Line::UnkCollision(unk_collision) => {
+                            let v = bincode::serialize(&unk_collision).unwrap();
+                            let buf: [u8; 40] = v.try_into().expect("incorrect size!");
+                            line.data = unsafe { std::mem::transmute(buf) };
+                        }
+                        Line::Attack(attack) => {
+                            let v = bincode::serialize(&attack).unwrap();
+                            let buf: [u8; 28] = v.try_into().expect("incorrect size!");
+                            let mut new_buf: [u8; 40] = [0; 40];
+                            new_buf[..28].clone_from_slice(&buf);
+                            line.data = unsafe { std::mem::transmute(new_buf) };
+                        }
+                        Line::Cancel(cancel) => {
+                            let v = bincode::serialize(&cancel).unwrap();
+                            let buf: [u8; 24] = v.try_into().expect("incorrect size!");
+                            let mut new_buf: [u8; 40] = [0; 40];
+                            new_buf[..24].clone_from_slice(&buf);
+                            line.data = unsafe { std::mem::transmute(new_buf) };
+                        }
+                        Line::Branch(branch) => {
+                            let v = bincode::serialize(&branch).unwrap();
+                            let buf: [u8; 24] = v.try_into().expect("incorrect size!");
+                            let mut new_buf: [u8; 40] = [0; 40];
+                            new_buf[..24].clone_from_slice(&buf);
+                            line.data = unsafe { std::mem::transmute(new_buf) };
+                        }
+                        Line::Move(line_move) => {
+                            let v = bincode::serialize(&line_move).unwrap();
+                            let buf: [u8; 20] = v.try_into().expect("incorrect size!");
+                            let mut new_buf: [u8; 40] = [0; 40];
+                            new_buf[..20].clone_from_slice(&buf);
+                            line.data = unsafe { std::mem::transmute(new_buf) };
+                        }
+                        Line::Offset(offset) => {
+                            let v = bincode::serialize(&offset).unwrap();
+                            let buf: [u8; 12] = v.try_into().expect("incorrect size!");
+                            let mut new_buf: [u8; 40] = [0; 40];
+                            new_buf[..12].clone_from_slice(&buf);
+                            line.data = unsafe { std::mem::transmute(new_buf) };
+                        }
+                        Line::Speed(offset) => {
+                            let v = bincode::serialize(&offset).unwrap();
+                            let buf: [u8; 24] = v.try_into().expect("incorrect size!");
+                            let mut new_buf: [u8; 40] = [0; 40];
+                            new_buf[..24].clone_from_slice(&buf);
+                            line.data = unsafe { std::mem::transmute(new_buf) };
+                        }
+                        Line::ActionFlag(action_flag) => {
+                            let v = bincode::serialize(&action_flag).unwrap();
+                            let buf: [u8; 8] = v.try_into().expect("incorrect size!");
+                            let mut new_buf: [u8; 40] = [0; 40];
+                            new_buf[..8].clone_from_slice(&buf);
+                            line.data = unsafe { std::mem::transmute(new_buf) };
+                        }
+                        Line::Effect(effect) => {
+                            match &mut effect.eff_type {
+                                EffectType::Set(set) => {
+                                    let mut v = Vec::new();
+                                    v.push(0);
+                                    v.append(&mut bincode::serialize(&set).unwrap());
+                                    let buf: [u8; 40] = v.try_into().expect("incorrect size!");
+                                    line.data = unsafe { std::mem::transmute(buf) };        
+                                }
+                                EffectType::Control(control) => {
+                                    let mut v = Vec::new();
+                                    v.push(1);
+                                    v.append(&mut bincode::serialize(&control).unwrap());
+                                    let buf: [u8; 40] = v.try_into().expect("incorrect size!");
+                                    line.data = unsafe { std::mem::transmute(buf) };        
+                                }
+                            }
+                        }
+                        Line::Sound(sound) => {
+                            match sound.sound {
+                                SoundType::Play(play) => {
+                                    let v = bincode::serialize(&play).unwrap();
+                                    let buf: [u8; 24] = v.try_into().expect("incorrect size!");
+                                    sound.data = unsafe { std::mem::transmute(buf) };
+                                    sound.sound_type = 0;
+                                }
+                                SoundType::Stop(stop) => {
+                                    let v = bincode::serialize(&stop).unwrap();
+                                    let buf: [u8; 24] = v.try_into().expect("incorrect size!");
+                                    sound.data = unsafe { std::mem::transmute(buf) };
+                                    sound.sound_type = 1;
+                                }
+                                SoundType::Unk(unk) => {
+                                    let v = bincode::serialize(&unk).unwrap();
+                                    let buf: [u8; 24] = v.try_into().expect("incorrect size!");
+                                    sound.data = unsafe { std::mem::transmute(buf) };
+                                    sound.sound_type = 2;
+                                }
+                                SoundType::DefaultSound(default) => {
+                                    let v = bincode::serialize(&default).unwrap();
+                                    let buf: [u8; 24] = v.try_into().expect("incorrect size!");
+                                    sound.data = unsafe { std::mem::transmute(buf) };
+                                    sound.sound_type = 0;
+                                }
+                            }
+                            let data: [u32; 6] = sound.data;
+                            let mut v: Vec<u8> = vec_u32_to_u8(data.to_vec());
+                            let mut sound_type: Vec<u8> = sound.sound_type.to_le_bytes().to_vec();
+                            v.append(&mut sound_type);
+                            let buf: [u8; 28] = v.try_into().expect("incorrect size!");
+                            let mut new_buf: [u8; 40] = [0; 40];
+                            new_buf[..28].clone_from_slice(&buf);
+                            line.data = unsafe { std::mem::transmute(new_buf) };
+                        }
+                        Line::DefaultLine(data) => {
+                            line.data = *data;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    fn prepare_write(&mut self) {
+        self.write_action_count();
+        self.write_action_lines();
+        self.name_list.prepare_write();
+    }
+    pub fn write(&mut self, buf: &mut Vec<u8>) {
+        self.prepare_write();
+        buf.write_u32::<LE>(0).unwrap();
+        self.file_header.write(buf);
+        self.data_header.write(buf);
+        for frame in &self.frame {
+            frame.write(buf);
+        }
+        for name in &mut self.act_names {
+            name.prepare_write();
+            name.write(buf);
+        }
+        self.name_list.write(buf);
+        self.data_header.anim_offset = self.name_list.anim_offset;
+        self.data_header.anim_offset_2 = self.name_list.anim_offset;
+        self.data_header.camera_offset = self.name_list.camera_offset;
+        self.data_header.bone_offset = self.name_list.bone_offset;
+
+        let mut new_data_header: Vec<u8> = Vec::new();
+        self.data_header.write(&mut new_data_header);
+        buf.splice(0xC..0x24, new_data_header);
+    }
 }
