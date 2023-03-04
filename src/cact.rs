@@ -31,12 +31,12 @@ impl CharaActionDataActionHeader {
 }
 
 #[derive(BinRead, Serialize, Deserialize)]
-struct CharaActionDataActionDataInfo {
-    category_id: i32,
-    sub_category_id: i32,
-    end_frame: i32,
-    loop_back_frame: i32,
-    option_flag: i32,
+pub struct CharaActionDataActionDataInfo {
+    pub category_id: i32,
+    pub sub_category_id: i32,
+    pub end_frame: i32,
+    pub loop_back_frame: i32,
+    pub option_flag: i32,
     reserve1: i32,
     reserve2: i32,
     reserve3: i32,
@@ -60,257 +60,255 @@ impl CharaActionDataActionDataInfo {
     }
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct CharaActionDataBaseAnime
+pub struct CharaActionDataBaseAnime
 {
-    motion_file_id: i32,
-    motion_id: i32,
-    motion_frame: f32,
-    blend: f32,
-    transparent: f32, 
-    unk1: f32, 
-    unk2: u32, 
-    unk3: u32, 
-    unk4: f32, 
+    pub motion_file_id: i32,
+    pub motion_id: i32,
+    pub motion_frame: f32,
+    pub blend: f32,
+    pub transparent: f32, 
+    pub unk1: f32, 
+    pub unk2: u32, 
+    pub unk3: u32, 
+    pub unk4: f32, 
     #[serde(skip_serializing, default)]
     padding: u32,
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct CharaActionDataFaceAnime
+pub struct CharaActionDataFaceAnime
 {
-    motion_file_id: i32,
-    motion_id: i32,
-    motion_frame: f32,
-    blend: f32,
+    pub motion_file_id: i32,
+    pub motion_id: i32,
+    pub motion_frame: f32,
+    pub blend: f32,
     #[serde(skip_serializing, default)]
     padding: [u32; 6],
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct CharaActionDataUnkAnime
+pub struct CharaActionDataUnkAnime
 {
-    motion_file_id: i32,
-    motion_id: i32,
-    motion_frame: f32,
-    blend: f32,
+    pub motion_file_id: i32,
+    pub motion_id: i32,
+    pub motion_frame: f32,
+    pub blend: f32,
     #[serde(skip_serializing, default)]
     padding: [u32; 6],
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct CharaActionDataCollision
+pub struct CharaActionDataCollision
 {
-    rect_id: i32,
-    rect_attr: i32,
-    flag: i32,
-    branch_key: i32,
-    bind_index: i32,
-    push_rate: f32,
-    rect: CollisionHitRect,
+    pub rect_id: i32,
+    pub rect_attr: i32,
+    pub flag: i32,
+    pub branch_key: i32,
+    pub bind_index: i32,
+    pub push_rate: f32,
+    pub rect: CollisionHitRect,
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct CharaActionDataUnkCollision
+pub struct CharaActionDataUnkCollision
 {
-    rect_id: i32,
-    rect_attr: i32,
-    flag: i32,
-    branch_key: i32,
-    bind_index: i32,
-    push_rate: f32,
-    rect: CollisionHitRect,
+    pub rect_id: i32,
+    pub rect_attr: i32,
+    pub flag: i32,
+    pub branch_key: i32,
+    pub bind_index: i32,
+    pub push_rate: f32,
+    pub rect: CollisionHitRect,
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Copy, Clone)]
-struct CollisionHitRect
+pub struct CollisionHitRect
 {
-    x: f32,
-    y: f32,
-    w: f32,
-    h: f32,
+    pub x: f32,
+    pub y: f32,
+    pub w: f32,
+    pub h: f32,
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct CharaActionDataAttack
+pub struct CharaActionDataAttack
 {
-    dataid: i32,
-    group_id: i32,
-    rect: CollisionHitRect,
-    flag: i32,
+    pub data_id: i32,
+    pub group_id: i32,
+    pub rect: CollisionHitRect,
+    pub flag: i32,
     #[serde(skip_serializing, default)]
     padding: [u32; 3],
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct CharaActionDataCancel
+pub struct CharaActionDataCancel
 {
-    flg1: i32,
-    flg2: i32,
-    flg3: i32,
-    terms: i32,
-    flg4: i32,
-    precede_frame: i32,
+    pub flg1: i32,
+    pub flg2: i32,
+    pub flg3: i32,
+    pub terms: i32,
+    pub flg4: i32,
+    pub precede_frame: i32,
     #[serde(skip_serializing, default)]
     padding: [u32; 4],
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct CharaActionDataBranch
+pub struct CharaActionDataBranch
 {
-    type_1: i32,
-    param: f32,
-    action_id: i32,
-    action_frame: i32,
-    type_2: i32,
-    param_2: f32,
+    pub type_1: i32,
+    pub param_1: f32,
+    pub action_id: i32,
+    pub action_frame: i32,
+    pub type_2: i32,
+    pub param_2: f32,
     #[serde(skip_serializing, default)]
     padding: [u32; 4],
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct CharaActionDataMove
+pub struct CharaActionDataMove
 {
-    x: f32,
-    y: f32,
-    col_x: f32,
-    col_y: f32,
-    option_flag: i32,
+    pub x: f32,
+    pub y: f32,
+    pub col_x: f32,
+    pub col_y: f32,
+    pub option_flag: i32,
     #[serde(skip_serializing, default)]
     padding: [u32; 5],
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct CharaActionDataOffset
+pub struct CharaActionDataOffset
 {
-    x: f32,
-    y: f32,
-    z: f32,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
     #[serde(skip_serializing, default)]
     padding: [u32; 7],
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct CharaActionDataSpeed
+pub struct CharaActionDataSpeed
 {
-    set_flag: i32,
-    move_x: f32,
-    move_y: f32,
-    add_x: f32,
-    add_y: f32,
-    option_flag: i32,
+    pub set_flag: i32,
+    pub move_x: f32,
+    pub move_y: f32,
+    pub add_x: f32,
+    pub add_y: f32,
+    pub option_flag: i32,
     #[serde(skip_serializing, default)]
     padding: [u32; 4],
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct CharaActionDataActionFlag
+pub struct CharaActionDataActionFlag
 {
-    flag: i32,
-    param1: i32,
+    pub flag: i32,
+    pub param1: i32,
     #[serde(skip_serializing, default)]
     padding: [u32; 8],
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct EffectTypeSet {
-    padding: [u8; 3],
-    pos_x: f32,
-    pos_y: f32,
-    pos_z: f32,
-    pos_base: i16,
-    act_file_id: i16,
-    term_flag: i16,
-    act_number: i16,
-    option_flag: i32,
-    unk_x: f32,
-    unk_y: f32,
-    unk_z: f32,
+pub struct EffectTypeSet {
+    pub pos_x: f32,
+    pub pos_y: f32,
+    pub pos_z: f32,
+    pub pos_base: i16,
+    pub act_file_id: i16,
+    pub term_flag: i16,
+    pub act_number: i16,
+    pub option_flag: i32,
+    pub unk_x: f32,
+    pub unk_y: f32,
+    pub unk_z: f32,
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct EffectTypeControl {
-    padding: [u8; 3],
-    reserve1: i32,
-    reserve2: i32,
-    reserve3: i32,
-    pos_base: i16,
-    act_file_id: i16,
-    term_flag: i16,
-    act_number: i16,
-    reserve4: i32,
+pub struct EffectTypeControl {
+    pub reserve1: i32,
+    pub reserve2: i32,
+    pub reserve3: i32,
+    pub pos_base: i16,
+    pub act_file_id: i16,
+    pub term_flag: i16,
+    pub act_number: i16,
+    pub option_flag: i32,
     padding2: [u32; 3],
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy)]
-enum EffectType {
+pub enum EffectType {
     Set(EffectTypeSet),
     Control(EffectTypeControl),
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize)]
-struct CharaActionDataEffect
+pub struct CharaActionDataEffect
 {
-    eff_type: EffectType,
+    pub eff_type: EffectType,
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct SoundPlay
+pub struct SoundPlay
 {
-    volume: f32,
-    common_id: i32,
-    unique_id: i16,
-    group_id: i16,
-    priority: i32,
-    option_flag: i16,
-    tag_id: i16,
-    option_param: f32,
+    pub volume: f32,
+    pub common_id: i32,
+    pub unique_id: i16,
+    pub group_id: i16,
+    pub priority: i32,
+    pub option_flag: i16,
+    pub tag_id: i16,
+    pub option_param: f32,
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct SoundStop
+pub struct SoundStop
 {
-    fade_sec: f32,
-    reserve_1: i16,
-    tag_id: i16,
-    reserve2: i32,
-    reserve3: i32,
-    reserve4: i32,
-    reserve5: i32,
+    pub fade_sec: f32,
+    pub reserve1: i16,
+    pub tag_id: i16,
+    pub reserve2: i32,
+    pub reserve3: i32,
+    pub reserve4: i32,
+    pub reserve5: i32,
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct SoundUnk
+pub struct SoundUnk
 {
-    float: f32,
-    reserve1: i32,
-    reserve2: i32,
-    reserve3: i32,
-    reserve4: i32,
-    reserve5: i32,
+    pub float: f32,
+    pub reserve1: i32,
+    pub reserve2: i32,
+    pub reserve3: i32,
+    pub reserve4: i32,
+    pub reserve5: i32,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy)]
-enum SoundType {
+pub enum SoundType {
     Play(SoundPlay),
     Stop(SoundStop),
     Unk(SoundUnk),
@@ -323,9 +321,9 @@ impl Default for SoundType {
     }
 }
 
-#[repr(C, packed)]
+#[repr(C)]
 #[derive(Serialize, Deserialize, Clone, Copy)]
-struct CharaActionDataSound
+pub struct CharaActionDataSound
 {
     #[serde(skip_serializing, default)]
     data: [u32; 6],
@@ -333,7 +331,7 @@ struct CharaActionDataSound
     sound_type: u32,
     #[serde(skip_serializing, default)]
     padding: [u32; 3],
-    sound: SoundType,
+    pub sound: SoundType,
 }
 
 #[binrw::parser(reader, endian)]
@@ -476,7 +474,7 @@ fn line_parser(count: usize, _: u8) -> binrw::BinResult<Vec<CharaActionDataActio
 }
 
 #[derive(Serialize, Deserialize)]
-enum Line {
+pub enum Line {
     BaseAnime(CharaActionDataBaseAnime),
     FaceAnime(CharaActionDataFaceAnime),
     UnkAnime(CharaActionDataUnkAnime),
@@ -501,12 +499,12 @@ impl Default for Line {
 }
 
 #[derive(BinRead, Serialize, Deserialize)]
-struct CharaActionDataActionLineFrame {
-    frame: i32,
+pub struct CharaActionDataActionLineFrame {
+    pub frame: i32,
     #[serde(skip_serializing, default)]
     data: [u32; 10],
     #[br(ignore)]
-    line: Line,
+    pub line: Line,
 }
 
 fn vec_u32_to_u8(vec32: Vec<u32>) -> Vec<u8> {
@@ -527,12 +525,12 @@ impl CharaActionDataActionLineFrame {
 }
 
 #[derive(BinRead, Serialize, Deserialize)]
-struct CharaActionDataActionLine {
+pub struct CharaActionDataActionLine {
     #[serde(skip_serializing, default)]
     key_frame_count: i32,
-    action_line_id: i32,
+    pub action_line_id: i32,
     #[br(count = key_frame_count)]
-    frame: Vec<CharaActionDataActionLineFrame>,
+    pub frame: Vec<CharaActionDataActionLineFrame>,
 }
 
 impl CharaActionDataActionLine {
@@ -546,11 +544,11 @@ impl CharaActionDataActionLine {
 }
 
 #[derive(BinRead, Serialize, Deserialize)]
-struct CharaActionDataActionData {
-    info: CharaActionDataActionDataInfo,
+pub struct CharaActionDataActionData {
+    pub info: CharaActionDataActionDataInfo,
     #[br(args(info.line_count as usize, 0))]
     #[br(parse_with = line_parser)]
-    frame: Vec<CharaActionDataActionLine>,
+    pub frame: Vec<CharaActionDataActionLine>,
 }
 
 impl CharaActionDataActionData {
@@ -577,14 +575,14 @@ fn name_parser(count: usize, _: u8) -> binrw::BinResult<Vec<Name>> {
 }
 
 #[derive(BinRead, Serialize, Deserialize)]
-struct Name {
+pub struct Name {
     #[serde(skip_serializing, default)]
     name_size: u32,
     #[br(count = name_size)]
     #[serde(skip_serializing, default)]
     name: Vec<u8>,
     #[br(ignore)]
-    pretty_name: String,
+    pub pretty_name: String,
 }
 
 impl Name {
@@ -752,16 +750,16 @@ impl NameList {
 
 #[derive(BinRead, Serialize, Deserialize)]
 #[br(magic = b"\x00\x00\x00\x00")]
-pub(crate) struct CharaActionData {
+pub struct CharaActionData {
     file_header: FileHeader,
     data_header: CharaActionDataActionHeader,
 
     #[br(count = data_header.action_count)]
-    frame: Vec<CharaActionDataActionData>,
+    pub frame: Vec<CharaActionDataActionData>,
 
     #[br(args(data_header.action_count as usize, 0))]
     #[br(parse_with = name_parser)]
-    act_names: Vec<Name>,
+    pub act_names: Vec<Name>,
 
     name_list: NameList,
 }
