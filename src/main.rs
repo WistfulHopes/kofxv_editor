@@ -142,7 +142,7 @@ impl eframe::App for KOFXVEditor {
                 ui.ctx().set_visuals(visuals);
             });    
 
-            ui.label("Open from the File menu, or drag-and-drop the file here.");
+            ui.label("Open from the File menu.");
 
             if let Some(picked_path) = &self.picked_path {
                 if self.success == false{
