@@ -859,7 +859,9 @@ impl CharaActionData {
                             match &mut effect.eff_type {
                                 EffectType::Set(set) => {
                                     let mut v = Vec::new();
-                                    v.push(0);
+                                    for _ in 0..4 {
+                                        v.push(0);
+                                    }
                                     v.append(&mut bincode::serialize(&set).unwrap());
                                     let buf: [u8; 40] = v.try_into().expect("incorrect size!");
                                     line.data = unsafe { std::mem::transmute(buf) };        
@@ -867,6 +869,9 @@ impl CharaActionData {
                                 EffectType::Control(control) => {
                                     let mut v = Vec::new();
                                     v.push(1);
+                                    for _ in 0..3 {
+                                        v.push(0);
+                                    }
                                     v.append(&mut bincode::serialize(&control).unwrap());
                                     let buf: [u8; 40] = v.try_into().expect("incorrect size!");
                                     line.data = unsafe { std::mem::transmute(buf) };        
