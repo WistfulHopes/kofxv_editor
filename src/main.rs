@@ -140,7 +140,7 @@ impl eframe::App for KOFXVEditor {
                 let mut visuals = ui.ctx().style().visuals.clone();
                 visuals.light_dark_radio_buttons(ui);
                 ui.ctx().set_visuals(visuals);
-            });    
+            });
 
             ui.label("Open from the File menu.");
 

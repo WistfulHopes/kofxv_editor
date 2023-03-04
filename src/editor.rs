@@ -688,10 +688,28 @@ pub fn render_line(ui: &mut egui::Ui, line: &mut Line) {
                         play.tag_id = tag_id.parse::<i16>().unwrap_or(play.tag_id);
                     });
                     ui.horizontal(|ui| {
-                        ui.label("Tag ID");
+                        ui.label("Option Param");
                         let option_param = &mut play.option_param.to_string();
                         ui.text_edit_singleline(option_param);
                         play.option_param = option_param.parse::<f32>().unwrap_or(play.option_param);
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label("Unknown 1");
+                        let unk1 = &mut sound.unk1.to_string();
+                        ui.text_edit_singleline(unk1);
+                        sound.unk1 = unk1.parse::<u32>().unwrap_or(sound.unk1);
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label("Unknown 2");
+                        let unk2 = &mut sound.unk2.to_string();
+                        ui.text_edit_singleline(unk2);
+                        sound.unk2 = unk2.parse::<u32>().unwrap_or(sound.unk2);
+                    });
+                    ui.horizontal(|ui| {
+                        ui.label("Unknown 3");
+                        let unk3 = &mut sound.unk3.to_string();
+                        ui.text_edit_singleline(unk3);
+                        sound.unk3 = unk3.parse::<u32>().unwrap_or(sound.unk3);
                     });
                 }
                 SoundType::Stop(stop) => {
@@ -870,6 +888,9 @@ impl Editor {
                         let mut name = name.pretty_name.clone();
                         if name == "" {
                             name = "Action ".to_owned() + &index.to_string();
+                        }
+                        else {
+                            name = format!("Action #{}: ", index) + &name.clone();
                         }
                         if ui.selectable_label(true, name.clone())
                         .clicked()

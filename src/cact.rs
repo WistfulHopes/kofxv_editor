@@ -329,6 +329,9 @@ pub struct CharaActionDataSound
     data: [u32; 6],
     #[serde(skip_serializing, default)]
     sound_type: u32,
+    pub unk1: u32,
+    pub unk2: u32,
+    pub unk3: u32,
     #[serde(skip_serializing, default)]
     padding: [u32; 3],
     pub sound: SoundType,
@@ -438,6 +441,9 @@ fn line_parser(count: usize, _: u8) -> binrw::BinResult<Vec<CharaActionDataActio
                     buf.clone_from_slice(&frame.data[..6]);
                     sound.data = buf;
                     sound.sound_type = frame.data[6];
+                    sound.unk1 = frame.data[7];
+                    sound.unk2 = frame.data[8];
+                    sound.unk3 = frame.data[9];
                     match sound.sound_type
                     {
                         0 => {
@@ -596,11 +602,22 @@ impl Name {
     }
 }
 
+#[derive(BinRead, Serialize, Deserialize, Default)]
+struct NameRepeat {
+    #[serde(skip_serializing, default)]
+    name_count: u32,
+    #[br(args(name_count as usize, 0))]
+    #[br(parse_with = name_parser)]
+    #[serde(skip_serializing, default)]
+    names: Vec<Name>,
+}
+
 #[derive(BinRead, Serialize, Deserialize)]
 struct NameList {
     #[serde(skip_serializing, default)]
     demo_count: u32,
-    unk1: [u32; 9],
+    #[br(count(demo_count as usize + 1))]
+    unk1: Vec<u32>,
     #[br(args(demo_count as usize, 0))]
     #[br(parse_with = name_parser)]
     demo_names: Vec<Name>,
@@ -629,19 +646,15 @@ struct NameList {
     #[br(parse_with = name_parser)]
     #[serde(skip_serializing, default)]
     face_names_2: Vec<Name>,
-    unk3: u64,
+    unk3: u32,
+    chara_anim_repeat_count: u32,
+    #[br(count(chara_anim_repeat_count as usize))]
     #[serde(skip_serializing, default)]
-    chara_anim_count_2: u32,
-    #[br(args(chara_anim_count_2 as usize, 0))]
-    #[br(parse_with = name_parser)]
+    chara_anim_repeat: Vec<NameRepeat>,
+    mat_repeat_count: u32,
+    #[br(count(mat_repeat_count as usize - 1))]
     #[serde(skip_serializing, default)]
-    chara_anim_names_2: Vec<Name>,
-    unk4: u32,
-    #[serde(skip_serializing, default)]
-    mat_count: u32,
-    #[br(args(mat_count as usize, 0))]
-    #[br(parse_with = name_parser)]
-    mat_names: Vec<Name>,
+    mat_names: Vec<NameRepeat>,
     unk5: u32,
     #[br(ignore)]
     #[serde(skip_serializing, default)]
@@ -671,10 +684,6 @@ impl NameList {
         for name in &mut self.chara_anim_names {
             name.prepare_write();
         }
-        self.chara_anim_count_2 = self.chara_anim_names_2.len() as u32;
-        for name in &mut self.chara_anim_names_2 {
-            name.prepare_write();
-        }
         self.cmn_anim_count = self.cmn_anim_names.len() as u32;
         for name in &mut self.cmn_anim_names {
             name.prepare_write();
@@ -683,13 +692,11 @@ impl NameList {
         for name in &mut self.face_names {
             name.prepare_write();
         }
-        self.face_count_2 = self.face_names_2.len() as u32;
-        for name in &mut self.face_names_2 {
-            name.prepare_write();
-        }
-        self.mat_count = self.mat_names.len() as u32;
-        for name in &mut self.mat_names {
-            name.prepare_write();
+        for index in 0..self.mat_names.len()  {
+            self.mat_names[index].name_count = self.mat_names[index].names.len() as u32;
+            for name in &mut self.mat_names[index].names {
+                name.prepare_write();
+            }
         }
         self.camera_count = self.camera_names.len() as u32;
         for name in &mut self.camera_names {
@@ -724,15 +731,22 @@ impl NameList {
                 name.write(buf);
             }
         }
-        buf.write_u64::<LE>(self.unk3).unwrap();
-        buf.write_u32::<LE>(self.chara_anim_count).unwrap();
-        for name in &self.chara_anim_names {
-            name.write(buf);
+        buf.write_u32::<LE>(self.unk3).unwrap();
+        buf.write_u32::<LE>(self.chara_anim_repeat_count).unwrap();
+        for _ in 0..self.chara_anim_repeat_count
+        {
+            buf.write_u32::<LE>(self.chara_anim_count).unwrap();
+            for name in &self.chara_anim_names {
+                name.write(buf);
+            }
         }
-        buf.write_u32::<LE>(self.unk4).unwrap();
-        buf.write_u32::<LE>(self.mat_count).unwrap();
-        for name in &self.mat_names {
-            name.write(buf);
+        buf.write_u32::<LE>(self.mat_repeat_count).unwrap();
+        for index in 0..self.mat_repeat_count - 1
+        {
+            buf.write_u32::<LE>(self.mat_names[index as usize].name_count).unwrap();
+            for name in &self.mat_names[index as usize].names {
+                name.write(buf);
+            }
         }
         buf.write_u32::<LE>(self.unk5).unwrap();
         self.camera_offset = buf.len() as u32 - 4;
@@ -909,10 +923,14 @@ impl CharaActionData {
                             let mut v: Vec<u8> = vec_u32_to_u8(data.to_vec());
                             let mut sound_type: Vec<u8> = sound.sound_type.to_le_bytes().to_vec();
                             v.append(&mut sound_type);
-                            let buf: [u8; 28] = v.try_into().expect("incorrect size!");
-                            let mut new_buf: [u8; 40] = [0; 40];
-                            new_buf[..28].clone_from_slice(&buf);
-                            line.data = unsafe { std::mem::transmute(new_buf) };
+                            let mut unk1: Vec<u8> = sound.unk1.to_le_bytes().to_vec();
+                            v.append(&mut unk1);
+                            let mut unk2: Vec<u8> = sound.unk2.to_le_bytes().to_vec();
+                            v.append(&mut unk2);
+                            let mut unk3: Vec<u8> = sound.unk3.to_le_bytes().to_vec();
+                            v.append(&mut unk3);
+                            let buf: [u8; 40] = v.try_into().expect("incorrect size!");
+                            line.data = unsafe { std::mem::transmute(buf) };
                         }
                         Line::DefaultLine(data) => {
                             line.data = *data;
