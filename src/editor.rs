@@ -970,9 +970,6 @@ impl Editor {
                         let last_frame_index = line.frame.len() - 1;
                         for (frame_index, line_frame) in &mut line.frame.iter_mut().enumerate() {
                             if line_frame.frame == self.current_frame {
-                                if ui.button("Remove Frame").clicked() {
-                                    removed_frame = frame_index as i32;
-                                }
                                 egui::ScrollArea::horizontal()
                                 .id_source(index)
                                 .show(ui, |ui|{
@@ -980,6 +977,9 @@ impl Editor {
                                         render_line(ui, &mut line_frame.line);
                                     });
                                 });
+                                if ui.button("Remove Frame").clicked() {
+                                    removed_frame = frame_index as i32;
+                                }
                             }
                             else if frame_index == last_frame_index {
                                 match line.action_line_id {
