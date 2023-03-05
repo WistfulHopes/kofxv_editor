@@ -962,16 +962,13 @@ impl Editor {
                     let mut removed_line: i32 = -1;
                     for (index, line) in &mut act.frame.iter_mut().enumerate()
                     {
-                        if ui.button("Remove Line").clicked() {
-                            removed_line = index as i32;
-                        }
                         let mut removed_frame: i32 = -1;
                         let mut added_frame: i32 = -1;
-                        let last_frame_index = line.frame.len() - 1;
+                        let last_frame = line.frame.len() - 1;
                         for (frame_index, line_frame) in &mut line.frame.iter_mut().enumerate() {
                             if line_frame.frame == self.current_frame {
                                 egui::ScrollArea::horizontal()
-                                .id_source(index)
+                                .id_source(index + frame_index)
                                 .show(ui, |ui|{
                                     ui.horizontal(|ui| {
                                         render_line(ui, &mut line_frame.line);
@@ -980,8 +977,9 @@ impl Editor {
                                 if ui.button("Remove Frame").clicked() {
                                     removed_frame = frame_index as i32;
                                 }
+                                break;
                             }
-                            else if frame_index == last_frame_index {
+                            else if last_frame == frame_index {
                                 match line.action_line_id {
                                     0 => {
                                         ui.label("Base Anime");
@@ -1033,6 +1031,9 @@ impl Editor {
                                     added_frame = frame_index as i32;
                                 }
                             }
+                        }
+                        if ui.button("Remove Line").clicked() {
+                            removed_line = index as i32;
                         }
                         if removed_frame >= 0 {
                             line.frame.remove(removed_frame as usize);
