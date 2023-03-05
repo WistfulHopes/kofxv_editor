@@ -982,9 +982,6 @@ impl Editor {
                                 });
                             }
                             else if frame_index == last_frame_index {
-                                if ui.button("Add Frame").clicked() {
-                                    added_frame = frame_index as i32;
-                                }
                                 match line.action_line_id {
                                     0 => {
                                         ui.label("Base Anime");
@@ -1031,6 +1028,9 @@ impl Editor {
                                     _ => {
                                         ui.label("Unknown Line Type");
                                     }
+                                }
+                                if ui.button("Add Frame").clicked() {
+                                    added_frame = frame_index as i32;
                                 }
                             }
                         }
