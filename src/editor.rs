@@ -1,9 +1,9 @@
 use std::{path::PathBuf, fs::File, io::Write};
 use binrw::BinReaderExt;
 
-use eframe::egui::{ComboBox, self, Response};
+use eframe::egui::{ComboBox, self, Response, Slider};
 
-use crate::cact::{CharaActionData, Line, EffectType, SoundType};
+use crate::cact::{CharaActionData, Line, EffectType, SoundType, CharaActionDataActionLine, CharaActionDataActionLineFrame};
 
 pub struct Editor {
     pub cact: Option<CharaActionData>,
@@ -959,10 +959,20 @@ impl Editor {
                     {
                         self.current_frame = act.info.end_frame;
                     }
+                    let mut removed_line: i32 = -1;
                     for (index, line) in &mut act.frame.iter_mut().enumerate()
                     {
-                        for line_frame in &mut line.frame {
+                        if ui.button("Remove Line").clicked() {
+                            removed_line = index as i32;
+                        }
+                        let mut removed_frame: i32 = -1;
+                        let mut added_frame: i32 = -1;
+                        let last_frame_index = line.frame.len() - 1;
+                        for (frame_index, line_frame) in &mut line.frame.iter_mut().enumerate() {
                             if line_frame.frame == self.current_frame {
+                                if ui.button("Remove Frame").clicked() {
+                                    removed_frame = frame_index as i32;
+                                }
                                 egui::ScrollArea::horizontal()
                                 .id_source(index)
                                 .show(ui, |ui|{
@@ -971,14 +981,86 @@ impl Editor {
                                     });
                                 });
                             }
+                            else if frame_index == last_frame_index {
+                                if ui.button("Add Frame").clicked() {
+                                    added_frame = frame_index as i32;
+                                }
+                                match line.action_line_id {
+                                    0 => {
+                                        ui.label("Base Anime");
+                                    }
+                                    1 => {
+                                        ui.label("Face Anime");
+                                    }
+                                    2 => {
+                                        ui.label("Unknown Anime");
+                                    }
+                                    3 => {
+                                        ui.label("Collision");
+                                    }
+                                    4 => {
+                                        ui.label("Unknown Collision");
+                                    }
+                                    5 => {
+                                        ui.label("Attack");
+                                    }
+                                    6 => {
+                                        ui.label("Cancel");
+                                    }
+                                    7 => {
+                                        ui.label("Branch");
+                                    }
+                                    8 => {
+                                        ui.label("Move");
+                                    }
+                                    9 => {
+                                        ui.label("Offset");
+                                    }
+                                    10 => {
+                                        ui.label("Speed");
+                                    }
+                                    11 => {
+                                        ui.label("Action Flag");
+                                    }
+                                    14 => {
+                                        ui.label("Effect");
+                                    }
+                                    15 => {
+                                        ui.label("Sound");
+                                    }
+                                    _ => {
+                                        ui.label("Unknown Line Type");
+                                    }
+                                }
+                            }
+                        }
+                        if removed_frame >= 0 {
+                            line.frame.remove(removed_frame as usize);
+                        }
+                        if added_frame >= 0 {
+                            let frame: CharaActionDataActionLineFrame = CharaActionDataActionLineFrame {
+                                frame: self.current_frame,
+                                data: [0; 10],
+                                line: line.frame[0].line,
+                            };
+                            line.frame.push(frame);
                         }
                     }
+                    if removed_line >= 0 {
+                        act.frame.remove(removed_line as usize);
+                    }
+                    ui.horizontal(|ui| {
+                        ui.add(
+                            Slider::new(&mut self.current_frame, 0..=act.info.end_frame - 1)
+                                .clamp_to_range(true)
+                                .smart_aim(true)
+                                .orientation(egui::SliderOrientation::Horizontal)
+                                .text("Current Frame")
+                        );
+                    })
                 });
                 ui.horizontal(|ui| {
-                    ui.label("Current Frame");
-                    let current_frame = &mut self.current_frame.to_string();
-                    ui.text_edit_singleline(current_frame);
-                    self.current_frame = current_frame.parse::<i32>().unwrap_or(self.current_frame);
+                    ui.label("");
                 }).response
             }
             None => ui.horizontal(|ui| {
@@ -1025,6 +1107,28 @@ impl Editor {
                 success
             }
             None => false
+        }
+    }
+    pub fn add_line(&mut self, line_type: Line)
+    {
+        match &mut self.cact {
+            Some(cact) =>
+            {   
+                let frame: CharaActionDataActionLineFrame = CharaActionDataActionLineFrame {
+                    frame: self.current_frame,
+                    data: [0; 10],
+                    line: line_type,
+                };
+                let mut frame_vec: Vec<CharaActionDataActionLineFrame> = Vec::new();
+                frame_vec.push(frame);
+                let line: CharaActionDataActionLine = CharaActionDataActionLine {
+                    key_frame_count: 1,
+                    action_line_id: line_type.to_i32(),
+                    frame: frame_vec,
+                };
+                cact.frame[self.action_index].frame.push(line);
+            }
+            None => ()
         }
     }
 }

@@ -65,7 +65,6 @@ fn main() {
         }
         _ => {
             let options = eframe::NativeOptions {
-                drag_and_drop_support: true,
                 initial_window_size: Some(Vec2{x: 1280.0, y: 720.0}),
                 ..Default::default()
             };
@@ -137,6 +136,9 @@ impl eframe::App for KOFXVEditor {
                 ui.menu_button("File", |ui| {
                     self.file_menu(ui)
                 });
+                ui.menu_button("Edit", |ui| {
+                    self.modify_menu(ui)
+                });
                 let mut visuals = ui.ctx().style().visuals.clone();
                 visuals.light_dark_radio_buttons(ui);
                 ui.ctx().set_visuals(visuals);
@@ -199,5 +201,51 @@ impl KOFXVEditor {
                 None => ()
             }
         }
+    }
+    fn modify_menu(&mut self, ui: &mut egui::Ui) {
+        ui.menu_button("Add Action Line", |ui| {
+            if ui.button("Base Anime").clicked() {
+                self.editor.add_line(cact::Line::BaseAnime(Default::default()))
+            }
+            if ui.button("Face Anime").clicked() {
+                self.editor.add_line(cact::Line::FaceAnime(Default::default()))
+            }
+            if ui.button("Unknown Anime").clicked() {
+                self.editor.add_line(cact::Line::UnkAnime(Default::default()))                
+            }
+            if ui.button("Collision").clicked() {
+                self.editor.add_line(cact::Line::Collision(Default::default()))
+            }
+            if ui.button("Unknown Collision").clicked() {
+                self.editor.add_line(cact::Line::UnkCollision(Default::default()))
+            }
+            if ui.button("Attack").clicked() {
+                self.editor.add_line(cact::Line::Attack(Default::default()))
+            }
+            if ui.button("Cancel").clicked() {
+                self.editor.add_line(cact::Line::Cancel(Default::default()))
+            }
+            if ui.button("Branch").clicked() {
+                self.editor.add_line(cact::Line::Branch(Default::default()))
+            }
+            if ui.button("Move").clicked() {
+                self.editor.add_line(cact::Line::Move(Default::default()))
+            }
+            if ui.button("Offset").clicked() {
+                self.editor.add_line(cact::Line::Offset(Default::default()))
+            }
+            if ui.button("Speed").clicked() {
+                self.editor.add_line(cact::Line::Speed(Default::default()))
+            }
+            if ui.button("Action Flag").clicked() {
+                self.editor.add_line(cact::Line::ActionFlag(Default::default()))
+            }
+            if ui.button("Effect").clicked() {
+                self.editor.add_line(cact::Line::Effect(Default::default()))
+            }
+            if ui.button("Sound").clicked() {
+                self.editor.add_line(cact::Line::Sound(Default::default()))
+            }
+        });
     }
 }

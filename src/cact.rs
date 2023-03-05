@@ -61,7 +61,7 @@ impl CharaActionDataActionDataInfo {
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataBaseAnime
 {
     pub motion_file_id: i32,
@@ -78,7 +78,7 @@ pub struct CharaActionDataBaseAnime
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataFaceAnime
 {
     pub motion_file_id: i32,
@@ -90,7 +90,7 @@ pub struct CharaActionDataFaceAnime
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataUnkAnime
 {
     pub motion_file_id: i32,
@@ -102,7 +102,7 @@ pub struct CharaActionDataUnkAnime
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataCollision
 {
     pub rect_id: i32,
@@ -115,7 +115,7 @@ pub struct CharaActionDataCollision
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataUnkCollision
 {
     pub rect_id: i32,
@@ -128,7 +128,7 @@ pub struct CharaActionDataUnkCollision
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Copy, Clone)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CollisionHitRect
 {
     pub x: f32,
@@ -138,7 +138,7 @@ pub struct CollisionHitRect
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataAttack
 {
     pub data_id: i32,
@@ -150,7 +150,7 @@ pub struct CharaActionDataAttack
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataCancel
 {
     pub flg1: i32,
@@ -164,7 +164,7 @@ pub struct CharaActionDataCancel
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataBranch
 {
     pub type_1: i32,
@@ -178,7 +178,7 @@ pub struct CharaActionDataBranch
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataMove
 {
     pub x: f32,
@@ -191,7 +191,7 @@ pub struct CharaActionDataMove
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataOffset
 {
     pub x: f32,
@@ -202,7 +202,7 @@ pub struct CharaActionDataOffset
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataSpeed
 {
     pub set_flag: i32,
@@ -216,7 +216,7 @@ pub struct CharaActionDataSpeed
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataActionFlag
 {
     pub flag: i32,
@@ -226,7 +226,7 @@ pub struct CharaActionDataActionFlag
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct EffectTypeSet {
     pub pos_x: f32,
     pub pos_y: f32,
@@ -242,7 +242,7 @@ pub struct EffectTypeSet {
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct EffectTypeControl {
     pub reserve1: i32,
     pub reserve2: i32,
@@ -261,15 +261,21 @@ pub enum EffectType {
     Control(EffectTypeControl),
 }
 
+impl Default for EffectType {
+    fn default() -> Self {
+        EffectType::Set(Default::default()) 
+    }
+}
+
 #[repr(C)]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataEffect
 {
     pub eff_type: EffectType,
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct SoundPlay
 {
     pub volume: f32,
@@ -283,7 +289,7 @@ pub struct SoundPlay
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct SoundStop
 {
     pub fade_sec: f32,
@@ -296,7 +302,7 @@ pub struct SoundStop
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct SoundUnk
 {
     pub float: f32,
@@ -317,12 +323,12 @@ pub enum SoundType {
 
 impl Default for SoundType {
     fn default() -> Self {
-        SoundType::DefaultSound([ 0u32; 6 ]) 
+        SoundType::Play(Default::default()) 
     }
 }
 
 #[repr(C)]
-#[derive(Serialize, Deserialize, Clone, Copy)]
+#[derive(Serialize, Deserialize, Clone, Copy, Default)]
 pub struct CharaActionDataSound
 {
     #[serde(skip_serializing, default)]
@@ -479,7 +485,7 @@ fn line_parser(count: usize, _: u8) -> binrw::BinResult<Vec<CharaActionDataActio
     Ok(line_vec)
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 pub enum Line {
     BaseAnime(CharaActionDataBaseAnime),
     FaceAnime(CharaActionDataFaceAnime),
@@ -504,11 +510,33 @@ impl Default for Line {
     }
 }
 
+impl Line {
+    pub fn to_i32(&self) -> i32 {
+        match self {
+            Line::BaseAnime(_) => 0,
+            Line::FaceAnime(_) => 1,
+            Line::UnkAnime(_) => 2,
+            Line::Collision(_) => 3,
+            Line::UnkCollision(_) => 4,
+            Line::Attack(_) => 5,
+            Line::Cancel(_) => 6,
+            Line::Branch(_) => 7,
+            Line::Move(_) => 8,
+            Line::Offset(_) => 9,
+            Line::Speed(_) => 10,
+            Line::ActionFlag(_) => 11,
+            Line::Effect(_) => 14,
+            Line::Sound(_) => 15,
+            Line::DefaultLine(_) => -1,
+        }
+    }
+}
+
 #[derive(BinRead, Serialize, Deserialize)]
 pub struct CharaActionDataActionLineFrame {
     pub frame: i32,
     #[serde(skip_serializing, default)]
-    data: [u32; 10],
+    pub data: [u32; 10],
     #[br(ignore)]
     pub line: Line,
 }
@@ -533,7 +561,7 @@ impl CharaActionDataActionLineFrame {
 #[derive(BinRead, Serialize, Deserialize)]
 pub struct CharaActionDataActionLine {
     #[serde(skip_serializing, default)]
-    key_frame_count: i32,
+    pub key_frame_count: i32,
     pub action_line_id: i32,
     #[br(count = key_frame_count)]
     pub frame: Vec<CharaActionDataActionLineFrame>,
@@ -650,7 +678,7 @@ struct NameList {
     chara_anim_repeat_count: u32,
     #[br(count(chara_anim_repeat_count as usize))]
     #[serde(skip_serializing, default)]
-    chara_anim_repeat: Vec<NameRepeat>,
+    chara_anim: Vec<NameRepeat>,
     mat_repeat_count: u32,
     #[br(count(mat_repeat_count as usize - 1))]
     #[serde(skip_serializing, default)]
